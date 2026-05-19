@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ПСМ">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>ПСМ Промстрой Механизация — Расчёт металлоконструкций и земляных работ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="calculator">
+        <header class="header">
+            <div class="logo">🏗️ ПСМ Промстрой Механизация</div>
+            <div class="subtitle">Расчёт металлоконструкций, земляных и бетонных работ</div>
+        </header>
+
+        <div class="section-collapse-wrapper">
+            <!-- ==================== МЕТАЛЛОКОНСТРУКЦИИ ==================== -->
+            <button class="section-collapse-btn active" data-section="metal">Металлоконструкции</button>
+            <div id="metalSection" class="section-collapse-content open">
+                <div class="tabs">
+                    <button id="tabPlate" class="tab active">📐 Пластина</button>
+                    <button id="tabPipe" class="tab">🔘 Труба</button>
+                    <button id="tabSquarePipe" class="tab">⬛ Профтруба</button>
+                    <button id="tabAngle" class="tab">📏 Уголок</button>
+                    <button id="tabChannel" class="tab">🔩 Швеллер</button>
+                    <button id="tabBeam" class="tab">🏗️ Двутавр</button>
+                    <button id="tabRebar" class="tab">🔹 Арматура</button>
+                    <button id="tabSquare" class="tab">⬛ Квадрат</button>
+                    <button id="tabStrip" class="tab">📏 Полоса</button>
+                    <button id="tabRound" class="tab">⚪ Круг</button>
+                    <button id="tabPolygon" class="tab">🔶 Многогранник</button>
+                    <button id="tabRifle" class="tab">📋 Лист рифлёный</button>
+                    <button id="tabMesh" class="tab">🕸️ Сетка арматурная</button>
+                    <button id="tabRebarFrame" class="tab">🔩 Арматурный каркас</button>
+                    <button id="tabRail" class="tab">🚆 Рельс крановый</button>
+                    <button id="tabPiles" class="tab">🛡️ Шпунт Ларсена</button>
+                    <button id="tabCProfile" class="tab">🔲 С‑образный профиль</button>
+                    <button id="tabZet" class="tab">⚡ Зетовый профиль</button>
+                    <button id="tabTavr" class="tab">🔱 Тавр</button>
+                    <button id="tabFut" class="tab">⚙️ Футеровка мельниц</button>
+                    <button id="tabPvl" class="tab">📐 Лист ПВЛ</button>
+                    <button id="tabFrame" class="tab">🏢 Металлокаркас</button>
+                    <button id="tabCutting" class="tab">📐 Раскрой листа</button>
+                </div>
+
+                <!-- Пластина -->
+                <div id="plateSection" class="section active">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина (A), мм</label><input type="number" id="plateLength" placeholder="1000" value="1000" step="any" min="0.1"></div>
+                            <div class="input-group"><label>📐 Ширина (B), мм</label><input type="number" id="plateWidth" placeholder="500" value="500" step="any" min="0.1"></div>
+                        </div>
+                        <div class="thickness-group">
+                            <div class="input-group"><label>🧱 Толщина (S), мм</label><input type="number" id="plateThickness" placeholder="10" value="10" step="any" min="0.01"></div>
+                            <div class="input-group">
+                                <label>⚙️ Металл / сплав</label>
+                                <select id="plateMaterial">
+                                    <option value="7850">Сталь (7850 кг/м³)</option>
+                                    <option value="2700">Алюминий (2700 кг/м³)</option>
+                                    <option value="8900">Медь (8900 кг/м³)</option>
+                                    <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                    <option value="7800">Чугун (7800 кг/м³)</option>
+                                    <option value="8500">Латунь (8500 кг/м³)</option>
+                                    <option value="7140">Цинк (7140 кг/м³)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button id="plateCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="plateResults">
+                        <div class="result-card"><div class="result-label">📐 Площадь</div><div class="result-value" id="plateArea">— <small>м²</small></div></div>
+                        <div class="result-card"><div class="result-label">📏 Диагональ</div><div class="result-value diagonal-highlight" id="plateDiag">— <small>мм</small></div></div>
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="plateWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="plateSectionArea">— <small>см²</small></div></div>
+                    </div>
+                    <div class="volume-split">
+                        <div class="volume-badge"><i>📦</i> Общий объем: <span id="plateTotalVolume">—</span> м³</div>
+                        <div class="volume-badge"><i>①</i> 1/3: <span id="plateVol1">—</span> м³</div>
+                        <div class="volume-badge"><i>②</i> 2/3: <span id="plateVol2">—</span> м³</div>
+                        <div class="volume-badge"><i>③</i> 3/3: <span id="plateVol3">—</span> м³</div>
+                    </div>
+                </div>
+
+                <!-- Труба круглая -->
+                <div id="pipeSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина трубы, мм</label><input type="number" id="pipeLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                            <div class="input-group"><label>🧱 Толщина стенки, мм</label><input type="number" id="pipeThickness" placeholder="5" value="5" step="any" min="0.01"></div>
+                        </div>
+                        <div class="dimension-row">
+                            <div class="input-group"><label id="pipeDimLabel">🔵 Внешний диаметр, мм</label><input type="number" id="pipeDimension" placeholder="100" value="100" step="any" min="0.1"></div>
+                            <div class="input-group" style="justify-content: flex-end;">
+                                <div class="radio-group">
+                                    <label class="radio-label"><input type="radio" name="pipeMode" value="diameter" checked> Диаметр</label>
+                                    <label class="radio-label"><input type="radio" name="pipeMode" value="circumference"> Окружность</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="pipeMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="pipeCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="pipeResults">
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="pipeWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📏 Внешний диаметр</div><div class="result-value" id="pipeOuterDia">— <small>мм</small></div></div>
+                        <div class="result-card"><div class="result-label">📏 Внутренний диаметр</div><div class="result-value" id="pipeInnerDia">— <small>мм</small></div></div>
+                        <div class="result-card"><div class="result-label">🔄 Внешняя окружность</div><div class="result-value" id="pipeOuterCirc">— <small>мм</small></div></div>
+                        <div class="result-card"><div class="result-label">🔄 Внутренняя окружность</div><div class="result-value" id="pipeInnerCirc">— <small>мм</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь внеш. пов.</div><div class="result-value" id="pipeOuterArea">— <small>м²</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь внутр. пов.</div><div class="result-value" id="pipeInnerArea">— <small>м²</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="pipeSectionArea">— <small>см²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Профтруба -->
+                <div id="squarePipeSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group">
+                                <label>📐 Режим ввода</label>
+                                <select id="sqPipeMode">
+                                    <option value="manual">Вручную</option>
+                                    <option value="gost">По ГОСТ 30245‑2003</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="sqPipeManualInputs">
+                            <div class="dimension-row">
+                                <div class="input-group"><label>📏 Длина трубы, мм</label><input type="number" id="sqPipeLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                                <div class="input-group"><label>📐 Сторона А, мм</label><input type="number" id="sqPipeSideA" placeholder="100" value="100" step="any" min="0.1"></div>
+                                <div class="input-group"><label>📐 Сторона Б, мм</label><input type="number" id="sqPipeSideB" placeholder="50" value="50" step="any" min="0.1"></div>
+                            </div>
+                            <div class="input-group"><label>🧱 Толщина стенки (S), мм</label><input type="number" id="sqPipeThickness" placeholder="5" value="5" step="any" min="0.01"></div>
+                        </div>
+                        <div id="sqPipeGostInputs" style="display:none;">
+                            <div class="input-group"><label>📏 Длина трубы, мм</label><input type="number" id="sqPipeGostLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                            <div class="input-group"><label>📐 Профиль</label><select id="sqPipeGostProfile"></select></div>
+                        </div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="sqPipeMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="sqPipeCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="sqPipeResults">
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="sqPipeWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📏 Диагональ (внеш.)</div><div class="result-value diagonal-highlight" id="sqPipeDiag">— <small>мм</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь внеш. пов.</div><div class="result-value" id="sqPipeOuterArea">— <small>м²</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь внутр. пов.</div><div class="result-value" id="sqPipeInnerArea">— <small>м²</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="sqPipeSectionArea">— <small>см²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Уголок -->
+                <div id="angleSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина уголка, мм</label><input type="number" id="angleLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                            <div class="input-group">
+                                <label>📐 Тип уголка</label>
+                                <select id="angleType">
+                                    <option value="equal">Равнополочный (ГОСТ 8509-93)</option>
+                                    <option value="unequal">Неравнополочный (ГОСТ 8510-86)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group"><label>📏 Профиль</label><select id="angleProfile"></select></div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="angleMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="angleCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="angleResults">
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="angleWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="angleSectionArea">— <small>см²</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь пов.</div><div class="result-value" id="angleSurface">— <small>м²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Швеллер (5 типов) -->
+                <div id="channelSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина швеллера, мм</label><input type="number" id="channelLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                            <div class="input-group">
+                                <label>📐 Тип швеллера</label>
+                                <select id="channelType">
+                                    <option value="gost8240">Обычный (ГОСТ 8240-97)</option>
+                                    <option value="gost8240P">Горячекатаный с параллельными полками (ГОСТ 8240-97 тип П)</option>
+                                    <option value="gost8281">Гнутый неравнополочный (ГОСТ 8281-80)</option>
+                                    <option value="gost8278">Гнутый равнополочный (ГОСТ 8278-83)</option>
+                                    <option value="gost8281slope">Гнутый с уклоном полок (ГОСТ 8281-80 уклон)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group"><label>📏 Профиль</label><select id="channelProfile"></select></div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="channelMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="channelCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="channelResults">
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="channelWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="channelSectionArea">— <small>см²</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь пов.</div><div class="result-value" id="channelSurface">— <small>м²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Двутавр (3 типа) -->
+                <div id="beamSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина двутавра, мм</label><input type="number" id="beamLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                            <div class="input-group">
+                                <label>📐 Тип двутавра</label>
+                                <select id="beamType">
+                                    <option value="gost8239">ГОСТ 8239-89 (обычный)</option>
+                                    <option value="gost26020Sh">ГОСТ 26020-83 (широкополочный)</option>
+                                    <option value="gost26020K">ГОСТ 26020-83 (колонный)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group"><label>📏 Профиль</label><select id="beamProfile"></select></div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="beamMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="beamCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="beamResults">
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="beamWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="beamSectionArea">— <small>см²</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь пов.</div><div class="result-value" id="beamSurface">— <small>м²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Арматура -->
+                <div id="rebarSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина стержня, мм</label><input type="number" id="rebarLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                            <div class="input-group">
+                                <label>📐 Диаметр арматуры</label>
+                                <select id="rebarProfile"></select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="rebarMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="rebarCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="rebarResults">
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="rebarWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="rebarSectionArea">— <small>см²</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь пов.</div><div class="result-value" id="rebarSurface">— <small>м²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Квадрат -->
+                <div id="squareSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина, мм</label><input type="number" id="squareLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                            <div class="input-group"><label>📐 Сторона квадрата, мм</label><input type="number" id="squareSide" placeholder="50" value="50" step="any" min="0.1"></div>
+                        </div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="squareMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="squareCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="squareResults">
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="squareWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="squareSectionArea">— <small>см²</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь пов.</div><div class="result-value" id="squareSurface">— <small>м²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Полоса -->
+                <div id="stripSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина, мм</label><input type="number" id="stripLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                            <div class="input-group"><label>📐 Ширина, мм</label><input type="number" id="stripWidth" placeholder="50" value="50" step="any" min="0.1"></div>
+                            <div class="input-group"><label>🧱 Толщина, мм</label><input type="number" id="stripThickness" placeholder="5" value="5" step="any" min="0.01"></div>
+                        </div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="stripMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="stripCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="stripResults">
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="stripWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="stripSectionArea">— <small>см²</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь пов.</div><div class="result-value" id="stripSurface">— <small>м²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Круг -->
+                <div id="roundSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина, мм</label><input type="number" id="roundLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                            <div class="input-group">
+                                <label>📐 Диаметр, мм</label>
+                                <select id="roundDiameter"></select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="roundMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="roundCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="roundResults">
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="roundWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="roundSectionArea">— <small>см²</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь пов.</div><div class="result-value" id="roundSurface">— <small>м²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Многогранник -->
+                <div id="polygonSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина, мм</label><input type="number" id="polygonLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                            <div class="input-group">
+                                <label>🔶 Тип многогранника</label>
+                                <select id="polygonType">
+                                    <option value="hex">Шестигранник (ГОСТ 2879-88)</option>
+                                    <option value="oct">Восьмигранник (ГОСТ 8560-78)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>📐 Размер под ключ / диаметр, мм</label>
+                            <select id="polygonSize"></select>
+                        </div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="polygonMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="polygonCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="polygonResults">
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="polygonWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="polygonSectionArea">— <small>см²</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь пов.</div><div class="result-value" id="polygonSurface">— <small>м²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Лист рифлёный -->
+                <div id="rifleSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group">
+                                <label>📐 Тип рифления</label>
+                                <select id="rifleType">
+                                    <option value="romb">Ромбическое</option>
+                                    <option value="chech">Чечевичное</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>🧱 Толщина листа, мм</label>
+                                <select id="rifleThickness"></select>
+                            </div>
+                        </div>
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Ширина, мм</label><input type="number" id="rifleWidth" placeholder="1000" value="1000" step="any" min="0.1"></div>
+                            <div class="input-group"><label>📐 Длина, мм</label><input type="number" id="rifleLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                        </div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="rifleMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="rifleCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="rifleResults">
+                        <div class="result-card"><div class="result-label">📐 Площадь</div><div class="result-value" id="rifleArea">— <small>м²</small></div></div>
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="rifleWeight">— <small>кг</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Сетка арматурная -->
+                <div id="meshSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group">
+                                <label>📐 Диаметр стержня, мм</label>
+                                <select id="meshDiameter"></select>
+                            </div>
+                            <div class="input-group">
+                                <label>📏 Шаг ячейки, мм</label>
+                                <select id="meshStep"></select>
+                            </div>
+                        </div>
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Ширина карты, мм</label><input type="number" id="meshWidth" placeholder="2000" value="2000" step="any" min="10"></div>
+                            <div class="input-group"><label>📐 Длина карты, мм</label><input type="number" id="meshLength" placeholder="3000" value="3000" step="any" min="10"></div>
+                        </div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="meshMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="meshCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="meshResults">
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="meshWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="meshSectionArea">— <small>см²</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь</div><div class="result-value" id="meshArea">— <small>м²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Арматурный каркас -->
+                <div id="rebarFrameSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group">
+                                <label>📐 Тип каркаса</label>
+                                <select id="rfType">
+                                    <option value="rect">Прямоугольный</option>
+                                    <option value="round">Круглый (свая)</option>
+                                </select>
+                            </div>
+                            <div class="input-group"><label>📏 Длина каркаса, мм</label><input type="number" id="rfLength" placeholder="6000" value="6000" step="any" min="1"></div>
+                        </div>
+                        <div id="rfRectInputs">
+                            <div class="dimension-row">
+                                <div class="input-group"><label>📐 Ширина, мм</label><input type="number" id="rfWidth" placeholder="300" value="300" step="any" min="1"></div>
+                                <div class="input-group"><label>📐 Высота, мм</label><input type="number" id="rfHeight" placeholder="400" value="400" step="any" min="1"></div>
+                            </div>
+                        </div>
+                        <div id="rfRoundInputs" style="display:none;">
+                            <div class="input-group"><label>⚪ Диаметр, мм</label><input type="number" id="rfDiameter" placeholder="800" value="800" step="any" min="1"></div>
+                        </div>
+                        <div class="dimension-row">
+                            <div class="input-group">
+                                <label>📏 Продольных стержней, шт.</label>
+                                <input type="number" id="rfLongCount" placeholder="8" value="8" step="any" min="1">
+                            </div>
+                            <div class="input-group">
+                                <label>🔵 Диаметр продольной, мм</label>
+                                <select id="rfLongDia"></select>
+                            </div>
+                        </div>
+                        <div class="dimension-row">
+                            <div class="input-group">
+                                <label>📏 Шаг поперечных, мм</label>
+                                <input type="number" id="rfTransStep" placeholder="200" value="200" step="any" min="1">
+                            </div>
+                            <div class="input-group">
+                                <label>🔵 Диаметр поперечной, мм</label>
+                                <select id="rfTransDia"></select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>🔗 Длина нахлёста (продольных), мм</label>
+                            <input type="number" id="rfLapLength" placeholder="0" value="0" step="any" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="rfMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="rfCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="rfResults">
+                        <div class="result-card"><div class="result-label">⚖️ Продольные</div><div class="result-value weight-highlight" id="rfLongWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">⚖️ Поперечные</div><div class="result-value weight-highlight" id="rfTransWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">⚖️ Общий вес</div><div class="result-value weight-highlight" id="rfTotalWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📏 Общая длина</div><div class="result-value" id="rfTotalLength">— <small>м</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь пов.</div><div class="result-value" id="rfSurface">— <small>м²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Рельс крановый -->
+                <div id="railSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина рельса, мм</label><input type="number" id="railLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                            <div class="input-group">
+                                <label>📐 Профиль (ГОСТ 4121-96)</label>
+                                <select id="railProfile"></select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="railMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="railCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="railResults">
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="railWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="railSectionArea">— <small>см²</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь пов.</div><div class="result-value" id="railSurface">— <small>м²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Шпунт Ларсена -->
+                <div id="pilesSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина шпунта, мм</label><input type="number" id="pilesLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                            <div class="input-group">
+                                <label>📐 Профиль (ГОСТ 4781-55)</label>
+                                <select id="pilesProfile"></select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="pilesMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="pilesCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="pilesResults">
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="pilesWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="pilesSectionArea">— <small>см²</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь пов.</div><div class="result-value" id="pilesSurface">— <small>м²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- С-образный профиль -->
+                <div id="cprofileSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина, мм</label><input type="number" id="cprofileLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                            <div class="input-group">
+                                <label>📐 Профиль (ГОСТ 8282-83)</label>
+                                <select id="cprofileProfile"></select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="cprofileMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="cprofileCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="cprofileResults">
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="cprofileWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="cprofileSectionArea">— <small>см²</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь пов.</div><div class="result-value" id="cprofileSurface">— <small>м²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Зетовый профиль -->
+                <div id="zetSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина, мм</label><input type="number" id="zetLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                            <div class="input-group">
+                                <label>📐 Профиль (ГОСТ 13229-78)</label>
+                                <select id="zetProfile"></select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="zetMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="zetCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="zetResults">
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="zetWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="zetSectionArea">— <small>см²</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь пов.</div><div class="result-value" id="zetSurface">— <small>м²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Тавр -->
+                <div id="tavrSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина, мм</label><input type="number" id="tavrLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                            <div class="input-group">
+                                <label>📐 Профиль (ГОСТ 26020-83)</label>
+                                <select id="tavrProfile"></select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="tavrMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="tavrCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="tavrResults">
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="tavrWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="tavrSectionArea">— <small>см²</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь пов.</div><div class="result-value" id="tavrSurface">— <small>м²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Футеровка мельниц -->
+                <div id="futSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина, мм</label><input type="number" id="futLength" placeholder="2000" value="2000" step="any" min="0.1"></div>
+                            <div class="input-group">
+                                <label>📐 Профиль (ГОСТ 1412-85)</label>
+                                <select id="futProfile"></select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="futMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="futCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="futResults">
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="futWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📊 Сечение</div><div class="result-value" id="futSectionArea">— <small>см²</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь пов.</div><div class="result-value" id="futSurface">— <small>м²</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Лист ПВЛ -->
+                <div id="pvlSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group">
+                                <label>📐 Толщина листа, мм</label>
+                                <select id="pvlThickness"></select>
+                            </div>
+                            <div class="input-group">
+                                <label>📏 Подача (шаг), мм</label>
+                                <select id="pvlPitch"></select>
+                            </div>
+                        </div>
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Ширина, мм</label><input type="number" id="pvlWidth" placeholder="1000" value="1000" step="any" min="1"></div>
+                            <div class="input-group"><label>📐 Длина, мм</label><input type="number" id="pvlLength" placeholder="2000" value="2000" step="any" min="1"></div>
+                        </div>
+                        <div class="input-group">
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="pvlMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
+                        </div>
+                        <button id="pvlCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="pvlResults">
+                        <div class="result-card"><div class="result-label">📐 Площадь</div><div class="result-value" id="pvlArea">— <small>м²</small></div></div>
+                        <div class="result-card"><div class="result-label">⚖️ Вес</div><div class="result-value weight-highlight" id="pvlWeight">— <small>кг</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Металлокаркас -->
+                <div id="frameSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Шаг колонн (м)</label><input type="number" id="frameColStep" placeholder="6" value="6" step="any" min="0.1"></div>
+                            <div class="input-group"><label>📐 Пролёт балок (м)</label><input type="number" id="frameBeamSpan" placeholder="12" value="12" step="any" min="0.1"></div>
+                        </div>
+                        <div class="dimension-row">
+                            <div class="input-group"><label>🏢 Количество этажей</label><input type="number" id="frameFloors" placeholder="1" value="1" step="any" min="1"></div>
+                            <div class="input-group"><label>📐 Кол-во пролётов</label><input type="number" id="frameBays" placeholder="3" value="3" step="any" min="1"></div>
+                        </div>
+                        <div class="input-group"><label>🔩 Профиль колонны</label><select id="frameColumnProfile"></select></div>
+                        <div class="input-group"><label>🔩 Профиль балки</label><select id="frameBeamProfile"></select></div>
+                        <button id="frameCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="frameResults">
+                        <div class="result-card"><div class="result-label">⚖️ Масса колонн</div><div class="result-value weight-highlight" id="frameColumnWeight">— <small>т</small></div></div>
+                        <div class="result-card"><div class="result-label">⚖️ Масса балок</div><div class="result-value weight-highlight" id="frameBeamWeight">— <small>т</small></div></div>
+                        <div class="result-card"><div class="result-label">⚖️ Общая масса</div><div class="result-value weight-highlight" id="frameTotalWeight">— <small>т</small></div></div>
+                    </div>
+                </div>
+
+                <!-- Раскрой листа -->
+                <div id="cuttingSection" class="section">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Ширина листа, мм</label><input type="number" id="cutSheetWidth" value="1500" step="any" min="1"></div>
+                            <div class="input-group"><label>📐 Высота листа, мм</label><input type="number" id="cutSheetHeight" value="3000" step="any" min="1"></div>
+                        </div>
+                        <div class="dimension-row">
+                            <div class="input-group"><label>⚙️ Металл / сплав</label>
+                                <select id="cutMaterial">
+                                    <option value="7850">Сталь (7850 кг/м³)</option>
+                                    <option value="2700">Алюминий (2700 кг/м³)</option>
+                                    <option value="8900">Медь (8900 кг/м³)</option>
+                                    <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                </select>
+                            </div>
+                            <div class="input-group"><label>📏 Толщина листа, мм</label><input type="number" id="cutThickness" value="10" step="any" min="0.01"></div>
+                        </div>
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Зазор резки, мм</label><input type="number" id="cutGap" value="2" step="any" min="0"></div>
+                            <div class="input-group"><label>📐 Поворот деталей</label>
+                                <select id="cutRotate">
+                                    <option value="no">Запрещён</option>
+                                    <option value="yes" selected>Разрешён</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-weight:600; font-size:0.8rem; text-transform:uppercase; color:#475569;">📋 Детали (длина × ширина × кол-во)</span>
+                                <button id="addCutPartBtn" class="calc-btn" style="padding:0.3rem 0.8rem;">➕ Добавить</button>
+                            </div>
+                            <div id="cutPartsList" style="margin-top:0.5rem;"></div>
+                        </div>
+                        <button id="cutCalculate" class="calc-btn">Рассчитать раскрой</button>
+                    </div>
+                    <div class="results-panel" id="cutResults" style="display:none;">
+                        <div class="result-card"><div class="result-label">📦 Требуется листов</div><div class="result-value" id="cutSheetsNeeded">—</div></div>
+                        <div class="result-card"><div class="result-label">⚖️ Общий вес</div><div class="result-value weight-highlight" id="cutTotalWeight">—</div></div>
+                        <div class="result-card"><div class="result-label">📊 Процент отходов</div><div class="result-value" id="cutWastePercent">—</div></div>
+                    </div>
+                    <div id="cuttingSchemes" style="margin-top:1rem;"></div>
+                </div>
+            </div>
+
+            <!-- Сварные соединения -->
+            <button class="section-collapse-btn" data-section="welding">Сварные соединения</button>
+            <div id="weldingSection" class="section-collapse-content">
+                <div class="tabs">
+                    <button id="tabWeld" class="tab active">🔩 Сварные швы</button>
+                </div>
+
+                <!-- Сварные швы -->
+                <div id="weldSection" class="section active">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group">
+                                <label>📐 Тип шва</label>
+                                <select id="weldType">
+                                    <option value="butt">Стыковой</option>
+                                    <option value="fillet">Угловой</option>
+                                    <option value="tee">Тавровый</option>
+                                </select>
+                            </div>
+                            <div class="input-group"><label>📏 Катет шва, мм</label><input type="number" id="weldLeg" value="6" step="any" min="1"></div>
+                        </div>
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина шва, мм</label><input type="number" id="weldLength" value="100" step="any" min="1"></div>
+                            <div class="input-group"><label>🔢 Количество швов</label><input type="number" id="weldCount" value="1" step="any" min="1"></div>
+                        </div>
+                        <div class="dimension-row">
+                            <div class="input-group">
+                                <label>⚡ Тип электрода</label>
+                                <select id="weldElectrode">
+                                    <option value="basic">Основной (УОНИ)</option>
+                                    <option value="acid">Кислый (АНО)</option>
+                                    <option value="rutile">Рутиловый (МР-3)</option>
+                                    <option value="cellulose">Целлюлозный (ВСЦ)</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>📊 Коэфф. наплавки</label>
+                                <input type="number" id="weldDeposit" value="1.5" step="0.1" min="1.0" max="2.0">
+                            </div>
+                        </div>
+                        <button id="weldCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="weldResults">
+                        <div class="result-card"><div class="result-label">⚖️ Масса наплавленного металла</div><div class="result-value weight-highlight" id="weldMetalMass">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">🔌 Расход электродов</div><div class="result-value" id="weldElectrodeMass">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📏 Длина электродов</div><div class="result-value" id="weldElectrodeLength">— <small>м</small></div></div>
+                        <div class="result-card"><div class="result-label">📦 Объём наплавки</div><div class="result-value" id="weldVolume">— <small>см³</small></div></div>
+                        <div class="result-card"><div class="result-label">📋 Тип шва</div><div class="result-value" id="weldTypeInfo">—</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Земляные работы -->
+            <button class="section-collapse-btn" data-section="earth">Земляные работы</button>
+            <div id="earthSection" class="section-collapse-content">
+                <div class="earth-container">
+                    <div class="dimension-row">
+                        <div class="input-group">
+                            <label>🚜 Тип работы</label>
+                            <select id="earthType">
+                                <option value="trench">Канава</option>
+                                <option value="excavation">Яма / Котлован</option>
+                                <option value="pile">Куча</option>
+                                <option value="leveling">Планировка</option>
+                                <option value="drain">Дренажная траншея</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>📐 Способ измерения</label>
+                            <select id="earthMeasureMode">
+                                <option value="manual">По размерам (рулетка)</option>
+                                <option value="points">По точкам (X, Y, Z)</option>
+                                <option value="grid">По сетке квадратов</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>🪨 Тип грунта</label>
+                            <select id="earthSoil">
+                                <option value="1400">Растительный грунт (1400 кг/м³)</option>
+                                <option value="1600">Песок (1600 кг/м³)</option>
+                                <option value="1800">Суглинок (1800 кг/м³)</option>
+                                <option value="1900">Гравий (1900 кг/м³)</option>
+                                <option value="2100">Глина (2100 кг/м³)</option>
+                                <option value="2200">Щебень (2200 кг/м³)</option>
+                                <option value="2400">Скальный грунт (2400 кг/м³)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="earthInputs"></div>
+                    <button id="earthCalculate" class="calc-btn">Рассчитать</button>
+                    <div class="results-panel" id="earthResults">
+                        <div class="result-card"><div class="result-label">📦 Объём выемки</div><div class="result-value" id="earthVolume">— <small>м³</small></div></div>
+                        <div class="result-card"><div class="result-label">⚖️ Масса грунта</div><div class="result-value weight-highlight" id="earthMass">— <small>т</small></div></div>
+                        <div class="result-card" id="earthBackfillCard" style="display:none"><div class="result-label">🔄 Обратная засыпка</div><div class="result-value" id="earthBackfill">— <small>м³</small></div></div>
+                        <div class="result-card" id="earthExtra1" style="display:none"><div class="result-label"></div><div class="result-value"></div></div>
+                        <div class="result-card" id="earthGridExtra" style="display:none"><div class="result-label"></div><div class="result-value"></div></div>
+                        <div class="result-card" id="drainGravelCard" style="display:none"><div class="result-label">🪨 Щебень</div><div class="result-value" id="drainGravel">— <small>м³</small></div></div>
+                        <div class="result-card" id="drainSandCard" style="display:none"><div class="result-label">🏖️ Песок</div><div class="result-value" id="drainSand">— <small>м³</small></div></div>
+                        <div class="result-card" id="drainSlopeCard" style="display:none"><div class="result-label">📐 Площадь откосов</div><div class="result-value" id="drainSlopeArea">— <small>м²</small></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Бетонные работы -->
+            <button class="section-collapse-btn" data-section="concrete">Бетонные работы</button>
+            <div id="concreteSection" class="section-collapse-content">
+                <div class="concrete-container">
+                    <div class="dimension-row">
+                        <div class="input-group">
+                            <label>🏗️ Тип смеси</label>
+                            <select id="concreteType">
+                                <option value="concrete">Бетон</option>
+                                <option value="mortar">Раствор</option>
+                            </select>
+                        </div>
+                        <div class="input-group" id="concreteMarkingGroup">
+                            <label>📋 Система обозначений</label>
+                            <select id="concreteMarking">
+                                <option value="M">Марка (М)</option>
+                                <option value="B">Класс (В)</option>
+                            </select>
+                        </div>
+                        <div class="input-group" id="concreteGradeGroup">
+                            <label>🏗️ Марка/Класс бетона</label>
+                            <select id="concreteGrade"></select>
+                        </div>
+                        <div class="input-group" id="mortarGradeGroup" style="display:none;">
+                            <label>🧱 Марка раствора</label>
+                            <select id="mortarGrade">
+                                <option value="25">М25</option>
+                                <option value="50">М50</option>
+                                <option value="75">М75</option>
+                                <option value="100">М100</option>
+                                <option value="150">М150</option>
+                                <option value="200">М200</option>
+                            </select>
+                        </div>
+                        <div class="input-group" id="cementGradeGroup" style="display:none;">
+                            <label>🧱 Марка цемента</label>
+                            <select id="cementGrade">
+                                <option value="400">М400</option>
+                                <option value="500">М500</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="dimension-row">
+                        <div class="input-group"><label>📏 Длина, м</label><input type="number" id="concreteLength" value="2" step="any" min="0.01"></div>
+                        <div class="input-group"><label>📐 Ширина, м</label><input type="number" id="concreteWidth" value="2" step="any" min="0.01"></div>
+                        <div class="input-group"><label>📏 Высота, м</label><input type="number" id="concreteHeight" value="0.2" step="any" min="0.01"></div>
+                    </div>
+                    <button id="concreteCalculate" class="calc-btn">Рассчитать</button>
+                    <div class="results-panel" id="concreteResults">
+                        <div class="result-card"><div class="result-label">📦 Объём</div><div class="result-value" id="concreteVolume">— <small>м³</small></div></div>
+                        <div class="result-card"><div class="result-label">⚖️ Масса</div><div class="result-value weight-highlight" id="concreteWeight">— <small>т</small></div></div>
+                        <div class="result-card"><div class="result-label">🧱 Цемент</div><div class="result-value" id="concreteCement">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">🏖️ Песок</div><div class="result-value" id="concreteSand">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">🪨 Щебень</div><div class="result-value" id="concreteGravel">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">💧 Вода</div><div class="result-value" id="concreteWater">— <small>л</small></div></div>
+                        <div class="result-card" id="strengthCard" style="display:none"><div class="result-label">💪 Прочность</div><div class="result-value" id="concreteStrength">—</div></div>
+                    </div>
+                    <div class="concrete-composition" id="concreteCompositionBlock">
+                        <h4>Состав на объём:</h4>
+                        <div id="concreteComposition"></div>
+                        <p class="concrete-note" id="concreteDescription"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Фундаменты -->
+            <button class="section-collapse-btn" data-section="foundations">Фундаменты</button>
+            <div id="foundationsSection" class="section-collapse-content">
+                <div class="tabs">
+                    <button id="tabStripFoundation" class="tab active">📐 Ленточный фундамент</button>
+                </div>
+
+                <!-- Ленточный фундамент -->
+                <div id="stripFoundationSection" class="section active">
+                    <div class="input-grid">
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📏 Длина ленты, м</label><input type="number" id="sfLength" value="10" step="any" min="0.1"></div>
+                            <div class="input-group"><label>📐 Ширина ленты, м</label><input type="number" id="sfWidth" value="0.4" step="any" min="0.1"></div>
+                            <div class="input-group"><label>📏 Высота ленты, м</label><input type="number" id="sfHeight" value="0.6" step="any" min="0.1"></div>
+                            <div class="input-group"><label>📏 Глубина заложения, м</label><input type="number" id="sfDepth" value="1.2" step="any" min="0.1"></div>
+                        </div>
+                        <div class="dimension-row">
+                            <div class="input-group"><label>🔢 Кол-во арматурных поясов</label><input type="number" id="sfBelts" value="2" step="any" min="1"></div>
+                            <div class="input-group"><label>🔵 Диаметр продольной арматуры, мм</label><select id="sfLongDia"></select></div>
+                            <div class="input-group"><label>📏 Шаг поперечных хомутов, мм</label><input type="number" id="sfTransStep" value="300" step="any" min="10"></div>
+                            <div class="input-group"><label>🔵 Диаметр поперечной арматуры, мм</label><select id="sfTransDia"></select></div>
+                        </div>
+                        <div class="dimension-row">
+                            <div class="input-group"><label>📋 Система обозначений бетона</label>
+                                <select id="sfConcreteMarking">
+                                    <option value="M">Марка (М)</option>
+                                    <option value="B">Класс (В)</option>
+                                </select>
+                            </div>
+                            <div class="input-group"><label>🏗️ Марка/Класс бетона</label><select id="sfConcreteGrade"></select></div>
+                            <div class="input-group"><label>🧱 Защитный слой бетона, мм</label><input type="number" id="sfCover" value="40" step="any" min="10"></div>
+                            <div class="input-group"><label>🧱 Толщина подбетонки, мм</label><input type="number" id="sfSubConcrete" value="100" step="any" min="0"></div>
+                        </div>
+                        <div class="input-group">
+                            <label>🔗 Длина нахлёста арматуры, мм</label>
+                            <input type="number" id="sfLapLength" value="0" step="any" min="0">
+                        </div>
+                        <button id="sfCalculate" class="calc-btn">Рассчитать</button>
+                    </div>
+                    <div class="results-panel" id="sfResults">
+                        <div class="result-card"><div class="result-label">📦 Объём бетона</div><div class="result-value" id="sfConcreteVolume">— <small>м³</small></div></div>
+                        <div class="result-card"><div class="result-label">⚖️ Масса бетона</div><div class="result-value weight-highlight" id="sfConcreteWeight">— <small>т</small></div></div>
+                        <div class="result-card"><div class="result-label">🔩 Продольная арматура</div><div class="result-value" id="sfLongWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">🔩 Поперечная арматура</div><div class="result-value" id="sfTransWeight">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">⚖️ Общая масса арматуры</div><div class="result-value weight-highlight" id="sfTotalRebar">— <small>кг</small></div></div>
+                        <div class="result-card"><div class="result-label">📐 Площадь опалубки</div><div class="result-value" id="sfFormworkArea">— <small>м²</small></div></div>
+                        <div class="result-card"><div class="result-label">🧱 Щитов опалубки</div><div class="result-value" id="sfFormworkPanels">— <small>шт.</small></div></div>
+                    </div>
+                    <div class="concrete-composition" id="sfCompositionBlock">
+                        <h4>Состав бетона:</h4>
+                        <div id="sfComposition"></div>
+                        <p class="concrete-note" id="sfDescription"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-text">Сделано Марухин Михаил Сергеевич. Мастер участка ООО ПСМ.</div>
+            <div class="footer-email">Предложения и ошибки: <a href="mailto:electronic_aid_center@mail.ru">electronic_aid_center@mail.ru</a></div>
+            <button id="printBtn" class="calc-btn">Печать</button>
+            <button id="historyBtn" class="calc-btn">История</button>
+        </footer>
+    </div>
+
+    <!-- Модальное окно истории -->
+    <div id="historyModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📋 История расчётов</h2>
+                <div>
+                    <button id="clearHistoryBtn" class="calc-btn" style="margin-right:0.5rem;">🗑 Очистить всё</button>
+                    <button id="closeHistoryModal">✕</button>
+                </div>
+            </div>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <!-- Заметки -->
+    <button id="newNotesFab" class="notes-fab">📝</button>
+    <div id="newNotesModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📝 Заметки</h2>
+                <button id="closeNewNotesModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div id="newNotesList"></div>
+                <button id="addNewNoteBtn" class="calc-btn">➕ Новая заметка</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('SW registered'))
+      .catch(err => console.log('SW error:', err));
+  }
+</script>
+
+
+
+</body>
+</html>
