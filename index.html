@@ -1,12 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="ПСМ">
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>ПСМ Промстрой Механизация — Расчёт металлоконструкций и земляных работ</title>
@@ -45,8 +39,7 @@
                     <button id="tabTavr" class="tab">🔱 Тавр</button>
                     <button id="tabFut" class="tab">⚙️ Футеровка мельниц</button>
                     <button id="tabPvl" class="tab">📐 Лист ПВЛ</button>
-                    <button id="tabFrame" class="tab">🏢 Металлокаркас</button>
-                    <button id="tabCutting" class="tab">📐 Раскрой листа</button>
+                    <button id="tabWeight" class="tab">⚖️ Расчёт по весу</button>
                 </div>
 
                 <!-- Пластина -->
@@ -812,121 +805,57 @@
                     </div>
                 </div>
 
-                <!-- Металлокаркас -->
-                <div id="frameSection" class="section">
+                <!-- Расчёт по весу -->
+                <div id="weightSection" class="section">
                     <div class="input-grid">
                         <div class="dimension-row">
-                            <div class="input-group"><label>📏 Шаг колонн (м)</label><input type="number" id="frameColStep" placeholder="6" value="6" step="any" min="0.1"></div>
-                            <div class="input-group"><label>📐 Пролёт балок (м)</label><input type="number" id="frameBeamSpan" placeholder="12" value="12" step="any" min="0.1"></div>
-                        </div>
-                        <div class="dimension-row">
-                            <div class="input-group"><label>🏢 Количество этажей</label><input type="number" id="frameFloors" placeholder="1" value="1" step="any" min="1"></div>
-                            <div class="input-group"><label>📐 Кол-во пролётов</label><input type="number" id="frameBays" placeholder="3" value="3" step="any" min="1"></div>
-                        </div>
-                        <div class="input-group"><label>🔩 Профиль колонны</label><select id="frameColumnProfile"></select></div>
-                        <div class="input-group"><label>🔩 Профиль балки</label><select id="frameBeamProfile"></select></div>
-                        <button id="frameCalculate" class="calc-btn">Рассчитать</button>
-                    </div>
-                    <div class="results-panel" id="frameResults">
-                        <div class="result-card"><div class="result-label">⚖️ Масса колонн</div><div class="result-value weight-highlight" id="frameColumnWeight">— <small>т</small></div></div>
-                        <div class="result-card"><div class="result-label">⚖️ Масса балок</div><div class="result-value weight-highlight" id="frameBeamWeight">— <small>т</small></div></div>
-                        <div class="result-card"><div class="result-label">⚖️ Общая масса</div><div class="result-value weight-highlight" id="frameTotalWeight">— <small>т</small></div></div>
-                    </div>
-                </div>
-
-                <!-- Раскрой листа -->
-                <div id="cuttingSection" class="section">
-                    <div class="input-grid">
-                        <div class="dimension-row">
-                            <div class="input-group"><label>📏 Ширина листа, мм</label><input type="number" id="cutSheetWidth" value="1500" step="any" min="1"></div>
-                            <div class="input-group"><label>📐 Высота листа, мм</label><input type="number" id="cutSheetHeight" value="3000" step="any" min="1"></div>
-                        </div>
-                        <div class="dimension-row">
-                            <div class="input-group"><label>⚙️ Металл / сплав</label>
-                                <select id="cutMaterial">
-                                    <option value="7850">Сталь (7850 кг/м³)</option>
-                                    <option value="2700">Алюминий (2700 кг/м³)</option>
-                                    <option value="8900">Медь (8900 кг/м³)</option>
-                                    <option value="7200">Нержавейка (7200 кг/м³)</option>
+                            <div class="input-group">
+                                <label>🔩 Тип профиля</label>
+                                <select id="weightType">
+                                    <option value="rebar">Арматура</option>
+                                    <option value="angle">Уголок</option>
+                                    <option value="channel">Швеллер</option>
+                                    <option value="beam">Двутавр</option>
+                                    <option value="pipe">Труба круглая</option>
+                                    <option value="squarePipe">Профтруба</option>
+                                    <option value="square">Квадрат</option>
+                                    <option value="strip">Полоса</option>
+                                    <option value="round">Круг</option>
+                                    <option value="polygon">Многогранник</option>
+                                    <option value="rail">Рельс крановый</option>
+                                    <option value="piles">Шпунт Ларсена</option>
+                                    <option value="cprofile">С-образный профиль</option>
+                                    <option value="zet">Зетовый профиль</option>
+                                    <option value="tavr">Тавр</option>
+                                    <option value="fut">Футеровка мельниц</option>
+                                    <option value="pvl">Лист ПВЛ</option>
+                                    <option value="rifle">Лист рифлёный</option>
+                                    <option value="plate">Пластина</option>
                                 </select>
                             </div>
-                            <div class="input-group"><label>📏 Толщина листа, мм</label><input type="number" id="cutThickness" value="10" step="any" min="0.01"></div>
-                        </div>
-                        <div class="dimension-row">
-                            <div class="input-group"><label>📏 Зазор резки, мм</label><input type="number" id="cutGap" value="2" step="any" min="0"></div>
-                            <div class="input-group"><label>📐 Поворот деталей</label>
-                                <select id="cutRotate">
-                                    <option value="no">Запрещён</option>
-                                    <option value="yes" selected>Разрешён</option>
-                                </select>
+                            <div class="input-group">
+                                <label>⚖️ Вес, кг</label>
+                                <input type="number" id="weightInput" value="10" step="any" min="0.01">
                             </div>
                         </div>
+                        <div class="dimension-row" id="weightParams"></div>
                         <div class="input-group">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-weight:600; font-size:0.8rem; text-transform:uppercase; color:#475569;">📋 Детали (длина × ширина × кол-во)</span>
-                                <button id="addCutPartBtn" class="calc-btn" style="padding:0.3rem 0.8rem;">➕ Добавить</button>
-                            </div>
-                            <div id="cutPartsList" style="margin-top:0.5rem;"></div>
+                            <label>⚙️ Металл / сплав</label>
+                            <select id="weightMaterial">
+                                <option value="7850">Сталь (7850 кг/м³)</option>
+                                <option value="2700">Алюминий (2700 кг/м³)</option>
+                                <option value="8900">Медь (8900 кг/м³)</option>
+                                <option value="7200">Нержавейка (7200 кг/м³)</option>
+                                <option value="7800">Чугун (7800 кг/м³)</option>
+                                <option value="8500">Латунь (8500 кг/м³)</option>
+                                <option value="7140">Цинк (7140 кг/м³)</option>
+                            </select>
                         </div>
-                        <button id="cutCalculate" class="calc-btn">Рассчитать раскрой</button>
+                        <button id="weightCalculate" class="calc-btn">Рассчитать</button>
                     </div>
-                    <div class="results-panel" id="cutResults" style="display:none;">
-                        <div class="result-card"><div class="result-label">📦 Требуется листов</div><div class="result-value" id="cutSheetsNeeded">—</div></div>
-                        <div class="result-card"><div class="result-label">⚖️ Общий вес</div><div class="result-value weight-highlight" id="cutTotalWeight">—</div></div>
-                        <div class="result-card"><div class="result-label">📊 Процент отходов</div><div class="result-value" id="cutWastePercent">—</div></div>
-                    </div>
-                    <div id="cuttingSchemes" style="margin-top:1rem;"></div>
-                </div>
-            </div>
-
-            <!-- Сварные соединения -->
-            <button class="section-collapse-btn" data-section="welding">Сварные соединения</button>
-            <div id="weldingSection" class="section-collapse-content">
-                <div class="tabs">
-                    <button id="tabWeld" class="tab active">🔩 Сварные швы</button>
-                </div>
-
-                <!-- Сварные швы -->
-                <div id="weldSection" class="section active">
-                    <div class="input-grid">
-                        <div class="dimension-row">
-                            <div class="input-group">
-                                <label>📐 Тип шва</label>
-                                <select id="weldType">
-                                    <option value="butt">Стыковой</option>
-                                    <option value="fillet">Угловой</option>
-                                    <option value="tee">Тавровый</option>
-                                </select>
-                            </div>
-                            <div class="input-group"><label>📏 Катет шва, мм</label><input type="number" id="weldLeg" value="6" step="any" min="1"></div>
-                        </div>
-                        <div class="dimension-row">
-                            <div class="input-group"><label>📏 Длина шва, мм</label><input type="number" id="weldLength" value="100" step="any" min="1"></div>
-                            <div class="input-group"><label>🔢 Количество швов</label><input type="number" id="weldCount" value="1" step="any" min="1"></div>
-                        </div>
-                        <div class="dimension-row">
-                            <div class="input-group">
-                                <label>⚡ Тип электрода</label>
-                                <select id="weldElectrode">
-                                    <option value="basic">Основной (УОНИ)</option>
-                                    <option value="acid">Кислый (АНО)</option>
-                                    <option value="rutile">Рутиловый (МР-3)</option>
-                                    <option value="cellulose">Целлюлозный (ВСЦ)</option>
-                                </select>
-                            </div>
-                            <div class="input-group">
-                                <label>📊 Коэфф. наплавки</label>
-                                <input type="number" id="weldDeposit" value="1.5" step="0.1" min="1.0" max="2.0">
-                            </div>
-                        </div>
-                        <button id="weldCalculate" class="calc-btn">Рассчитать</button>
-                    </div>
-                    <div class="results-panel" id="weldResults">
-                        <div class="result-card"><div class="result-label">⚖️ Масса наплавленного металла</div><div class="result-value weight-highlight" id="weldMetalMass">— <small>кг</small></div></div>
-                        <div class="result-card"><div class="result-label">🔌 Расход электродов</div><div class="result-value" id="weldElectrodeMass">— <small>кг</small></div></div>
-                        <div class="result-card"><div class="result-label">📏 Длина электродов</div><div class="result-value" id="weldElectrodeLength">— <small>м</small></div></div>
-                        <div class="result-card"><div class="result-label">📦 Объём наплавки</div><div class="result-value" id="weldVolume">— <small>см³</small></div></div>
-                        <div class="result-card"><div class="result-label">📋 Тип шва</div><div class="result-value" id="weldTypeInfo">—</div></div>
+                    <div class="results-panel" id="weightResults">
+                        <div class="result-card"><div class="result-label">📏 Длина</div><div class="result-value" id="weightLength">— <small>м</small></div></div>
+                        <div class="result-card"><div class="result-label">📏 Вес 1 пог. м</div><div class="result-value" id="weightPerMeter">— <small>кг/м</small></div></div>
                     </div>
                 </div>
             </div>
@@ -1107,7 +1036,6 @@
         <footer class="footer">
             <div class="footer-text">Сделано Марухин Михаил Сергеевич. Мастер участка ООО ПСМ.</div>
             <div class="footer-email">Предложения и ошибки: <a href="mailto:electronic_aid_center@mail.ru">electronic_aid_center@mail.ru</a></div>
-            <button id="printBtn" class="calc-btn">Печать</button>
             <button id="historyBtn" class="calc-btn">История</button>
         </footer>
     </div>
@@ -1143,13 +1071,69 @@
 
     <script src="script.js"></script>
 
+
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('SW registered'))
-      .catch(err => console.log('SW error:', err));
+      .then(reg => {
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // Новая версия готова – тихая перезагрузка
+              window.location.reload();
+            }
+          });
+        });
+      });
   }
 </script>
+
+
+
+
+<script>
+  let deferredPrompt;
+
+  // Слушаем событие beforeinstallprompt
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Показываем кнопку установки (можно добавить в интерфейс)
+    const installBtn = document.createElement('button');
+    installBtn.textContent = '📲 Установить приложение';
+    installBtn.style.position = 'fixed';
+    installBtn.style.bottom = '20px';
+    installBtn.style.left = '50%';
+    installBtn.style.transform = 'translateX(-50%)';
+    installBtn.style.zIndex = '9999';
+    installBtn.style.padding = '12px 24px';
+    installBtn.style.backgroundColor = '#2563eb';
+    installBtn.style.color = 'white';
+    installBtn.style.border = 'none';
+    installBtn.style.borderRadius = '8px';
+    installBtn.style.fontWeight = 'bold';
+    installBtn.style.cursor = 'pointer';
+    installBtn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+
+    installBtn.addEventListener('click', () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('Пользователь установил приложение');
+          }
+          deferredPrompt = null;
+          installBtn.remove();
+        });
+      }
+    });
+
+    document.body.appendChild(installBtn);
+  });
+</script>
+
 
 
 

@@ -1,6 +1,6 @@
 /**
  * ПСМ Промстрой Механизация – калькулятор металлоконструкций, земляных и бетонных работ.
- * Полный код с учётом откосов, сетки квадратов, дренажной траншеи, классов бетона В, раскроя листа, ленточного фундамента и сварных швов.
+ * Полный код с учётом откосов, сетки квадратов, дренажной траншеи, классов бетона В, ленточного фундамента и расчёта по весу.
  */
 (function() {
     // ==================== РАСКРЫВАЮЩИЕСЯ СЕКЦИИ ====================
@@ -44,10 +44,7 @@
         tavr: document.getElementById('tabTavr'),
         fut: document.getElementById('tabFut'),
         pvl: document.getElementById('tabPvl'),
-        frame: document.getElementById('tabFrame'),
-        cutting: document.getElementById('tabCutting'),
-        stripFoundation: document.getElementById('tabStripFoundation'),
-        weld: document.getElementById('tabWeld')
+        weight: document.getElementById('tabWeight')
     };
     const sections = {
         plate: document.getElementById('plateSection'),
@@ -71,10 +68,7 @@
         tavr: document.getElementById('tavrSection'),
         fut: document.getElementById('futSection'),
         pvl: document.getElementById('pvlSection'),
-        frame: document.getElementById('frameSection'),
-        cutting: document.getElementById('cuttingSection'),
-        stripFoundation: document.getElementById('stripFoundationSection'),
-        weld: document.getElementById('weldSection')
+        weight: document.getElementById('weightSection')
     };
 
     // ---------- DOM элементы металлов ----------
@@ -279,18 +273,6 @@
         btn: document.getElementById('pvlCalculate'),
         area: document.getElementById('pvlArea'),
         weight: document.getElementById('pvlWeight')
-    };
-    const frame = {
-        colStep: document.getElementById('frameColStep'),
-        beamSpan: document.getElementById('frameBeamSpan'),
-        floors: document.getElementById('frameFloors'),
-        bays: document.getElementById('frameBays'),
-        columnProfile: document.getElementById('frameColumnProfile'),
-        beamProfile: document.getElementById('frameBeamProfile'),
-        btn: document.getElementById('frameCalculate'),
-        columnWeight: document.getElementById('frameColumnWeight'),
-        beamWeight: document.getElementById('frameBeamWeight'),
-        totalWeight: document.getElementById('frameTotalWeight')
     };
 
     // ---------- БАЗЫ ДАННЫХ ----------
@@ -824,25 +806,6 @@
         });
     })();
 
-    (function populateFrameProfiles() {
-        const colProfiles = beamData.gost26020K;
-        const beamProfiles = beamData.gost8239;
-        frame.columnProfile.innerHTML = '';
-        colProfiles.forEach((item, idx) => {
-            const opt = document.createElement('option');
-            opt.value = idx;
-            opt.textContent = `${item.name} (сеч. ${item.A} см²)`;
-            frame.columnProfile.appendChild(opt);
-        });
-        frame.beamProfile.innerHTML = '';
-        beamProfiles.forEach((item, idx) => {
-            const opt = document.createElement('option');
-            opt.value = idx;
-            opt.textContent = `${item.name} (сеч. ${item.A} см²)`;
-            frame.beamProfile.appendChild(opt);
-        });
-    })();
-
     // Заполнение для арматурного каркаса
     function populateRebarSelect(selectId) {
         const select = document.getElementById(selectId);
@@ -894,10 +857,7 @@
     tabs.tavr.addEventListener('click', () => switchTab('tavr'));
     tabs.fut.addEventListener('click', () => switchTab('fut'));
     tabs.pvl.addEventListener('click', () => switchTab('pvl'));
-    tabs.frame.addEventListener('click', () => switchTab('frame'));
-    tabs.cutting.addEventListener('click', () => switchTab('cutting'));
-    tabs.stripFoundation.addEventListener('click', () => switchTab('stripFoundation'));
-    tabs.weld.addEventListener('click', () => switchTab('weld'));
+    tabs.weight.addEventListener('click', () => switchTab('weight'));
 
     [...pipe.radios].forEach(r => r.addEventListener('change', () => {
         pipe.label.textContent = (r.value === 'diameter') ? '🔵 Внешний диаметр, мм' : '🔄 Внешняя окружность, мм';
@@ -1327,248 +1287,489 @@
         addHistory('Лист ПВЛ', { вес: weight, площадь: areaM2 });
     });
 
-    frame.btn.addEventListener('click', () => {
-        const colStep = +frame.colStep.value;
-        const beamSpan = +frame.beamSpan.value;
-        const floors = +frame.floors.value;
-        const bays = +frame.bays.value;
-        const colProf = beamData.gost26020K[parseInt(frame.columnProfile.value)];
-        const beamProf = beamData.gost8239[parseInt(frame.beamProfile.value)];
-        if ([colStep, beamSpan, floors, bays].some(isNaN) || colStep <= 0 || beamSpan <= 0 || floors < 1 || bays < 1 || !colProf || !beamProf) return;
-        const colCount = (bays + 1) * floors;
-        const beamCount = bays * floors;
-        const colWeight = colProf.A / 10000 * colStep * colCount * 7850 / 1000;
-        const beamWeight = beamProf.A / 10000 * beamSpan * beamCount * 7850 / 1000;
-        frame.columnWeight.innerHTML = `${formatNumber(colWeight, 3)} <small>т</small>`;
-        frame.beamWeight.innerHTML = `${formatNumber(beamWeight, 3)} <small>т</small>`;
-        frame.totalWeight.innerHTML = `${formatNumber(colWeight + beamWeight, 3)} <small>т</small>`;
-        addHistory('Металлокаркас', { колонны_т: colWeight, балки_т: beamWeight });
-    });
+    // ==================== РАСЧЁТ ПО ВЕСУ (новая вкладка) ====================
+    const weightType = document.getElementById('weightType');
+    const weightInput = document.getElementById('weightInput');
+    const weightParams = document.getElementById('weightParams');
+    const weightMaterial = document.getElementById('weightMaterial');
+    const weightCalculate = document.getElementById('weightCalculate');
+    const weightLength = document.getElementById('weightLength');
+    const weightPerMeter = document.getElementById('weightPerMeter');
 
-    // ==================== РАСКРОЙ ЛИСТА ====================
-    const cutSheetWidth = document.getElementById('cutSheetWidth');
-    const cutSheetHeight = document.getElementById('cutSheetHeight');
-    const cutMaterial = document.getElementById('cutMaterial');
-    const cutThickness = document.getElementById('cutThickness');
-    const cutGap = document.getElementById('cutGap');
-    const cutRotate = document.getElementById('cutRotate');
-    const cutPartsList = document.getElementById('cutPartsList');
-    const addCutPartBtn = document.getElementById('addCutPartBtn');
-    const cutCalculateBtn = document.getElementById('cutCalculate');
-    const cutSheetsNeeded = document.getElementById('cutSheetsNeeded');
-    const cutTotalWeight = document.getElementById('cutTotalWeight');
-    const cutWastePercent = document.getElementById('cutWastePercent');
-    const cutResults = document.getElementById('cutResults');
-    const cuttingSchemes = document.getElementById('cuttingSchemes');
-
-    let cutParts = [];
-
-    function renderCutParts() {
-        cutPartsList.innerHTML = '';
-        if (cutParts.length === 0) {
-            cutPartsList.innerHTML = '<p style="color:#64748b; font-size:0.9rem;">Детали не добавлены.</p>';
-            return;
+    // Функция для обновления полей параметров в зависимости от типа профиля
+    function updateWeightParams() {
+        const type = weightType.value;
+        let html = '';
+        switch (type) {
+            case 'rebar':
+                html += `<div class="input-group"><label>📐 Диаметр, мм</label><select id="wRebarDia">`;
+                rebarDiaList.forEach(d => {
+                    html += `<option value="${d}">${d} мм</option>`;
+                });
+                html += `</select></div>`;
+                break;
+            case 'angle':
+                html += `<div class="input-group"><label>📐 Тип уголка</label><select id="wAngleType">
+                    <option value="equal">Равнополочный</option>
+                    <option value="unequal">Неравнополочный</option>
+                </select></div>`;
+                html += `<div class="input-group"><label>📏 Профиль</label><select id="wAngleProfile"></select></div>`;
+                break;
+            case 'channel':
+                html += `<div class="input-group"><label>📐 Тип швеллера</label><select id="wChannelType">
+                    <option value="gost8240">Обычный (ГОСТ 8240-97)</option>
+                    <option value="gost8240P">С параллельными полками</option>
+                    <option value="gost8281">Гнутый неравнополочный</option>
+                    <option value="gost8278">Гнутый равнополочный</option>
+                </select></div>`;
+                html += `<div class="input-group"><label>📏 Профиль</label><select id="wChannelProfile"></select></div>`;
+                break;
+            case 'beam':
+                html += `<div class="input-group"><label>📐 Тип двутавра</label><select id="wBeamType">
+                    <option value="gost8239">Обычный (ГОСТ 8239-89)</option>
+                    <option value="gost26020Sh">Широкополочный</option>
+                    <option value="gost26020K">Колонный</option>
+                </select></div>`;
+                html += `<div class="input-group"><label>📏 Профиль</label><select id="wBeamProfile"></select></div>`;
+                break;
+            case 'pipe':
+                html += `<div class="input-group"><label>📏 Длина, мм</label><input type="number" id="wPipeLength" placeholder="1000"></div>`;
+                html += `<div class="input-group"><label>📐 Внешний диаметр, мм</label><input type="number" id="wPipeDia" placeholder="100"></div>`;
+                html += `<div class="input-group"><label>🧱 Толщина стенки, мм</label><input type="number" id="wPipeWall" placeholder="5"></div>`;
+                break;
+            case 'squarePipe':
+                html += `<div class="input-group"><label>📐 Сторона А, мм</label><input type="number" id="wSqPipeA" placeholder="100"></div>`;
+                html += `<div class="input-group"><label>📐 Сторона Б, мм</label><input type="number" id="wSqPipeB" placeholder="50"></div>`;
+                html += `<div class="input-group"><label>🧱 Толщина стенки, мм</label><input type="number" id="wSqPipeWall" placeholder="5"></div>`;
+                break;
+            case 'square':
+                html += `<div class="input-group"><label>📐 Сторона, мм</label><input type="number" id="wSquareSide" placeholder="50"></div>`;
+                break;
+            case 'strip':
+                html += `<div class="input-group"><label>📐 Ширина, мм</label><input type="number" id="wStripWidth" placeholder="50"></div>`;
+                html += `<div class="input-group"><label>🧱 Толщина, мм</label><input type="number" id="wStripThick" placeholder="5"></div>`;
+                break;
+            case 'round':
+                html += `<div class="input-group"><label>📐 Диаметр, мм</label><select id="wRoundDia"></select></div>`;
+                break;
+            case 'polygon':
+                html += `<div class="input-group"><label>🔶 Тип</label><select id="wPolyType">
+                    <option value="hex">Шестигранник</option>
+                    <option value="oct">Восьмигранник</option>
+                </select></div>`;
+                html += `<div class="input-group"><label>📐 Размер под ключ, мм</label><select id="wPolySize"></select></div>`;
+                break;
+            case 'rail':
+                html += `<div class="input-group"><label>📐 Профиль</label><select id="wRailProfile"></select></div>`;
+                break;
+            case 'piles':
+                html += `<div class="input-group"><label>📐 Профиль</label><select id="wPilesProfile"></select></div>`;
+                break;
+            case 'cprofile':
+                html += `<div class="input-group"><label>📐 Профиль</label><select id="wCProfile"></select></div>`;
+                break;
+            case 'zet':
+                html += `<div class="input-group"><label>📐 Профиль</label><select id="wZetProfile"></select></div>`;
+                break;
+            case 'tavr':
+                html += `<div class="input-group"><label>📐 Профиль</label><select id="wTavrProfile"></select></div>`;
+                break;
+            case 'fut':
+                html += `<div class="input-group"><label>📐 Профиль</label><select id="wFutProfile"></select></div>`;
+                break;
+            case 'pvl':
+                html += `<div class="input-group"><label>📐 Толщина, мм</label><select id="wPvlThick"></select></div>`;
+                html += `<div class="input-group"><label>📏 Подача, мм</label><select id="wPvlPitch"></select></div>`;
+                html += `<div class="input-group"><label>📐 Ширина, мм</label><input type="number" id="wPvlWidth" value="1000"></div>`;
+                break;
+            case 'rifle':
+                html += `<div class="input-group"><label>📐 Тип рифления</label><select id="wRifleType">
+                    <option value="romb">Ромбическое</option>
+                    <option value="chech">Чечевичное</option>
+                </select></div>`;
+                html += `<div class="input-group"><label>🧱 Толщина, мм</label><select id="wRifleThick"></select></div>`;
+                html += `<div class="input-group"><label>📐 Ширина, мм</label><input type="number" id="wRifleWidth" value="1000"></div>`;
+                break;
+            case 'plate':
+                html += `<div class="input-group"><label>📐 Ширина, мм</label><input type="number" id="wPlateWidth" value="500"></div>`;
+                html += `<div class="input-group"><label>🧱 Толщина, мм</label><input type="number" id="wPlateThick" value="10"></div>`;
+                break;
         }
-        cutParts.forEach((part, idx) => {
-            const div = document.createElement('div');
-            div.style.display = 'flex';
-            div.style.gap = '0.5rem';
-            div.style.alignItems = 'center';
-            div.style.marginBottom = '0.3rem';
-            div.innerHTML = `
-                <span style="flex:1;">${part.length} × ${part.width} мм × ${part.count} шт.</span>
-                <button class="delete-part-btn" data-idx="${idx}" style="background:#ef4444; color:white; border:none; padding:0.2rem 0.6rem; cursor:pointer;">🗑</button>
-            `;
-            cutPartsList.appendChild(div);
-        });
-        document.querySelectorAll('.delete-part-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const idx = parseInt(e.target.getAttribute('data-idx'));
-                cutParts.splice(idx, 1);
-                renderCutParts();
+        weightParams.innerHTML = html;
+
+        // Заполнение селектов для конкретных типов
+        if (type === 'angle') {
+            const angleType = document.getElementById('wAngleType');
+            populateAngleProfilesForWeight(angleType.value);
+            angleType.addEventListener('change', function() {
+                populateAngleProfilesForWeight(this.value);
             });
+        } else if (type === 'channel') {
+            const channelType = document.getElementById('wChannelType');
+            populateChannelProfilesForWeight(channelType.value);
+            channelType.addEventListener('change', function() {
+                populateChannelProfilesForWeight(this.value);
+            });
+        } else if (type === 'beam') {
+            const beamType = document.getElementById('wBeamType');
+            populateBeamProfilesForWeight(beamType.value);
+            beamType.addEventListener('change', function() {
+                populateBeamProfilesForWeight(this.value);
+            });
+        } else if (type === 'round') {
+            const select = document.getElementById('wRoundDia');
+            select.innerHTML = '';
+            roundData.forEach((item, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = `${item.d} мм`;
+                select.appendChild(opt);
+            });
+        } else if (type === 'polygon') {
+            const polyType = document.getElementById('wPolyType');
+            populatePolygonSizesForWeight(polyType.value);
+            polyType.addEventListener('change', function() {
+                populatePolygonSizesForWeight(this.value);
+            });
+        } else if (type === 'rail') {
+            const select = document.getElementById('wRailProfile');
+            select.innerHTML = '';
+            railData.forEach((item, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = item.name;
+                select.appendChild(opt);
+            });
+        } else if (type === 'piles') {
+            const select = document.getElementById('wPilesProfile');
+            select.innerHTML = '';
+            pilesData.forEach((item, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = item.name;
+                select.appendChild(opt);
+            });
+        } else if (type === 'cprofile') {
+            const select = document.getElementById('wCProfile');
+            select.innerHTML = '';
+            cprofileData.forEach((item, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = item.name;
+                select.appendChild(opt);
+            });
+        } else if (type === 'zet') {
+            const select = document.getElementById('wZetProfile');
+            select.innerHTML = '';
+            zetData.forEach((item, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = item.name;
+                select.appendChild(opt);
+            });
+        } else if (type === 'tavr') {
+            const select = document.getElementById('wTavrProfile');
+            select.innerHTML = '';
+            tavrData.forEach((item, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = item.name;
+                select.appendChild(opt);
+            });
+        } else if (type === 'fut') {
+            const select = document.getElementById('wFutProfile');
+            select.innerHTML = '';
+            futData.forEach((item, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = item.name;
+                select.appendChild(opt);
+            });
+        } else if (type === 'pvl') {
+            const thickSelect = document.getElementById('wPvlThick');
+            thickSelect.innerHTML = '';
+            pvlThicknesses.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.textContent = `${t} мм`;
+                thickSelect.appendChild(opt);
+            });
+            const pitchSelect = document.getElementById('wPvlPitch');
+            pitchSelect.innerHTML = '';
+            pvlPitches.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p;
+                opt.textContent = `${p} мм`;
+                pitchSelect.appendChild(opt);
+            });
+        } else if (type === 'rifle') {
+            const typeSelect = document.getElementById('wRifleType');
+            populateRifleThicknessForWeight(typeSelect.value);
+            typeSelect.addEventListener('change', function() {
+                populateRifleThicknessForWeight(this.value);
+            });
+        }
+    }
+
+    // Вспомогательные функции для заполнения селектов
+    function populateAngleProfilesForWeight(type) {
+        const select = document.getElementById('wAngleProfile');
+        select.innerHTML = '';
+        angleData[type].forEach((item, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.textContent = `${item.name} (A=${item.A} см²)`;
+            select.appendChild(opt);
         });
     }
 
-    addCutPartBtn.addEventListener('click', () => {
-        const length = prompt('Длина детали (мм):');
-        if (length === null) return;
-        const width = prompt('Ширина детали (мм):');
-        if (width === null) return;
-        const count = prompt('Количество деталей:');
-        if (count === null) return;
-        const l = parseFloat(length);
-        const w = parseFloat(width);
-        const c = parseInt(count);
-        if (isNaN(l) || isNaN(w) || isNaN(c) || l <= 0 || w <= 0 || c <= 0) {
-            alert('Некорректные данные!');
-            return;
-        }
-        cutParts.push({ length: l, width: w, count: c });
-        renderCutParts();
-    });
-
-    // Алгоритм жадного раскроя (простой)
-    function packParts(parts, sheetW, sheetH, gap, allowRotate) {
-        let items = [];
-        parts.forEach(p => {
-            for (let i = 0; i < p.count; i++) {
-                items.push({ w: p.width, h: p.length, rotated: false });
-                if (allowRotate) {
-                    items.push({ w: p.length, h: p.width, rotated: true });
-                }
-            }
+    function populateChannelProfilesForWeight(type) {
+        const select = document.getElementById('wChannelProfile');
+        select.innerHTML = '';
+        channelData[type].forEach((item, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.textContent = `${item.name} (A=${item.A} см²)`;
+            select.appendChild(opt);
         });
-        items.sort((a, b) => (b.w * b.h) - (a.w * a.h));
-
-        let sheets = [];
-        let currentSheet = [];
-        let usedWidth = 0;
-        let usedHeight = 0;
-        let maxHeightInRow = 0;
-        let startX = 0;
-        let startY = 0;
-
-        items.forEach(item => {
-            const w = item.w + gap;
-            const h = item.h + gap;
-            let placed = false;
-            for (let s = 0; s < sheets.length; s++) {
-                let sheet = sheets[s];
-                for (let y = 0; y <= sheet.height - h; y += 1) {
-                    for (let x = 0; x <= sheet.width - w; x += 1) {
-                        if (isSpaceFree(sheet.items, x, y, w, h)) {
-                            sheet.items.push({ x, y, w: w - gap, h: h - gap, rotated: item.rotated });
-                            placed = true;
-                            break;
-                        }
-                    }
-                    if (placed) break;
-                }
-                if (placed) break;
-            }
-            if (!placed) {
-                let newSheet = { width: sheetW, height: sheetH, items: [] };
-                newSheet.items.push({ x: 0, y: 0, w: w - gap, h: h - gap, rotated: item.rotated });
-                sheets.push(newSheet);
-            }
-        });
-
-        return sheets;
     }
 
-    function isSpaceFree(items, x, y, w, h) {
-        for (let item of items) {
-            if (item.x < x + w && item.x + item.w > x && item.y < y + h && item.y + item.h > y) {
-                return false;
-            }
-        }
-        return true;
+    function populateBeamProfilesForWeight(type) {
+        const select = document.getElementById('wBeamProfile');
+        select.innerHTML = '';
+        let profiles;
+        if (type === 'gost8239') profiles = beamData.gost8239;
+        else if (type === 'gost26020Sh') profiles = beamData.gost26020Sh;
+        else profiles = beamData.gost26020K;
+        profiles.forEach((item, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.textContent = `${item.name} (A=${item.A} см²)`;
+            select.appendChild(opt);
+        });
     }
 
-    cutCalculateBtn.addEventListener('click', () => {
-        const sheetW = parseFloat(cutSheetWidth.value);
-        const sheetH = parseFloat(cutSheetHeight.value);
-        const thickness = parseFloat(cutThickness.value);
-        const gap = parseFloat(cutGap.value);
-        const allowRotate = cutRotate.value === 'yes';
-        const dens = parseFloat(cutMaterial.value);
-
-        if ([sheetW, sheetH, thickness, gap].some(isNaN) || sheetW <= 0 || sheetH <= 0 || thickness <= 0 || gap < 0) {
-            alert('Некорректные размеры листа или толщины!');
-            return;
-        }
-        if (cutParts.length === 0) {
-            alert('Добавьте хотя бы одну деталь!');
-            return;
-        }
-
-        const sheets = packParts(cutParts, sheetW, sheetH, gap, allowRotate);
-        const totalSheets = sheets.length;
-        const totalArea = sheetW * sheetH * totalSheets;
-        let usedArea = 0;
-        sheets.forEach(s => {
-            s.items.forEach(item => {
-                usedArea += item.w * item.h;
-            });
+    function populatePolygonSizesForWeight(type) {
+        const select = document.getElementById('wPolySize');
+        select.innerHTML = '';
+        const sizes = type === 'hex' ? hexSizes : octSizes;
+        sizes.forEach(S => {
+            const data = getPolygonData(S, type);
+            const opt = document.createElement('option');
+            opt.value = S;
+            opt.textContent = `${S} мм (A=${data.A.toFixed(2)} см²)`;
+            select.appendChild(opt);
         });
-        const wastePercent = ((totalArea - usedArea) / totalArea * 100).toFixed(1);
-        const totalWeight = (totalArea / 1e6) * (thickness / 1000) * dens * totalSheets;
+    }
 
-        cutSheetsNeeded.innerHTML = `${totalSheets} шт.`;
-        cutTotalWeight.innerHTML = `${totalWeight.toFixed(2)} <small>кг</small>`;
-        cutWastePercent.innerHTML = `${wastePercent} %`;
-        cutResults.style.display = 'flex';
-
-        let schemeHtml = '';
-        sheets.forEach((sheet, idx) => {
-            schemeHtml += `<h5 style="margin-top:0.5rem;">Лист №${idx+1}</h5>`;
-            schemeHtml += `<div style="display:grid; grid-template-columns:auto 1fr; gap:0.3rem; font-size:0.8rem; border:1px solid #e2e8f0; padding:0.5rem;">`;
-            schemeHtml += `<div style="font-weight:600;">№</div><div style="font-weight:600;">Координаты (x, y) и размеры (w × h)</div>`;
-            sheet.items.forEach((item, i) => {
-                schemeHtml += `<div>${i+1}</div>`;
-                schemeHtml += `<div>(${item.x.toFixed(0)}, ${item.y.toFixed(0)}) ${item.w.toFixed(0)} × ${item.h.toFixed(0)} мм</div>`;
-            });
-            schemeHtml += `</div>`;
+    function populateRifleThicknessForWeight(type) {
+        const select = document.getElementById('wRifleThick');
+        select.innerHTML = '';
+        rifleData[type].forEach((item, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.textContent = `${item.t} мм (${item.m2} кг/м²)`;
+            select.appendChild(opt);
         });
-        cuttingSchemes.innerHTML = schemeHtml;
-        addHistory('Раскрой листа', { листов: totalSheets, вес: totalWeight, отходы: wastePercent });
-    });
+    }
 
-    // ==================== СВАРНЫЕ СОЕДИНЕНИЯ ====================
-    const weldType = document.getElementById('weldType');
-    const weldLeg = document.getElementById('weldLeg');
-    const weldLength = document.getElementById('weldLength');
-    const weldCount = document.getElementById('weldCount');
-    const weldElectrode = document.getElementById('weldElectrode');
-    const weldDeposit = document.getElementById('weldDeposit');
-    const weldCalculate = document.getElementById('weldCalculate');
-    const weldMetalMass = document.getElementById('weldMetalMass');
-    const weldElectrodeMass = document.getElementById('weldElectrodeMass');
-    const weldElectrodeLength = document.getElementById('weldElectrodeLength');
-    const weldVolume = document.getElementById('weldVolume');
-    const weldTypeInfo = document.getElementById('weldTypeInfo');
+    // Первоначальное заполнение
+    updateWeightParams();
+    weightType.addEventListener('change', updateWeightParams);
 
-    const weldData = {
-        butt: { name: 'Стыковой', areaFunc: (leg) => leg * leg / 2 },
-        fillet: { name: 'Угловой', areaFunc: (leg) => leg * leg / 2 },
-        tee: { name: 'Тавровый', areaFunc: (leg) => leg * leg / 2 }
-    };
-
-    const electrodeData = {
-        basic: { name: 'Основной (УОНИ)', density: 7800, loss: 1.6 },
-        acid: { name: 'Кислый (АНО)', density: 7800, loss: 1.5 },
-        rutile: { name: 'Рутиловый (МР-3)', density: 7800, loss: 1.4 },
-        cellulose: { name: 'Целлюлозный (ВСЦ)', density: 7800, loss: 1.7 }
-    };
-
-    weldCalculate.addEventListener('click', () => {
-        const type = weldType.value;
-        const leg = parseFloat(weldLeg.value);
-        const length = parseFloat(weldLength.value);
-        const count = parseInt(weldCount.value);
-        const deposit = parseFloat(weldDeposit.value);
-        const electrode = weldElectrode.value;
-
-        if ([leg, length, count, deposit].some(v => isNaN(v) || v <= 0)) {
-            alert('Проверьте корректность введённых данных.');
+    // Логика расчёта
+    weightCalculate.addEventListener('click', () => {
+        const type = weightType.value;
+        const weight = parseFloat(weightInput.value);
+        const dens = parseFloat(weightMaterial.value);
+        if (isNaN(weight) || weight <= 0) {
+            alert('Введите корректный вес.');
             return;
         }
 
-        const area = weldData[type].areaFunc(leg) / 100; // мм² → см²
-        const volume = area * (length / 10) * count; // см³
-        const metalMass = volume * 7.85 / 1000; // кг (плотность стали 7.85 г/см³)
-        const electrodeMass = metalMass * deposit * (electrodeData[electrode].loss || 1.5);
-        // Длина электрода (приближённо: 1 кг ≈ 10 м для электрода 4 мм)
-        const elecLength = electrodeMass * 10;
+        let areaCm2 = 0;
+        let lengthM = 0;
+        let weightPerMeterVal = 0;
 
-        weldMetalMass.innerHTML = `${metalMass.toFixed(3)} <small>кг</small>`;
-        weldElectrodeMass.innerHTML = `${electrodeMass.toFixed(3)} <small>кг</small>`;
-        weldElectrodeLength.innerHTML = `${elecLength.toFixed(2)} <small>м</small>`;
-        weldVolume.innerHTML = `${volume.toFixed(2)} <small>см³</small>`;
-        weldTypeInfo.innerHTML = `${weldData[type].name} (${electrodeData[electrode].name})`;
+        switch (type) {
+            case 'rebar': {
+                const dia = parseInt(document.getElementById('wRebarDia').value);
+                const area = Math.PI * dia * dia / 4 / 100; // см²
+                areaCm2 = area;
+                weightPerMeterVal = (area / 10000) * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'angle': {
+                const idx = parseInt(document.getElementById('wAngleProfile').value);
+                const profile = angleData[document.getElementById('wAngleType').value][idx];
+                areaCm2 = profile.A;
+                weightPerMeterVal = (profile.A / 10000) * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'channel': {
+                const idx = parseInt(document.getElementById('wChannelProfile').value);
+                const profile = channelData[document.getElementById('wChannelType').value][idx];
+                areaCm2 = profile.A;
+                weightPerMeterVal = (profile.A / 10000) * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'beam': {
+                const idx = parseInt(document.getElementById('wBeamProfile').value);
+                const typeVal = document.getElementById('wBeamType').value;
+                let profiles;
+                if (typeVal === 'gost8239') profiles = beamData.gost8239;
+                else if (typeVal === 'gost26020Sh') profiles = beamData.gost26020Sh;
+                else profiles = beamData.gost26020K;
+                const profile = profiles[idx];
+                areaCm2 = profile.A;
+                weightPerMeterVal = (profile.A / 10000) * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'pipe': {
+                const dia = parseFloat(document.getElementById('wPipeDia').value);
+                const wall = parseFloat(document.getElementById('wPipeWall').value);
+                const outerDm = dia / 1000;
+                const innerDm = (dia - 2 * wall) / 1000;
+                const areaM2 = Math.PI / 4 * (outerDm * outerDm - innerDm * innerDm);
+                areaCm2 = areaM2 * 10000;
+                weightPerMeterVal = areaM2 * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'squarePipe': {
+                const A = parseFloat(document.getElementById('wSqPipeA').value);
+                const B = parseFloat(document.getElementById('wSqPipeB').value);
+                const wall = parseFloat(document.getElementById('wSqPipeWall').value);
+                const Am = A / 1000, Bm = B / 1000;
+                const iAm = (A - 2 * wall) / 1000, iBm = (B - 2 * wall) / 1000;
+                const areaM2 = Am * Bm - iAm * iBm;
+                areaCm2 = areaM2 * 10000;
+                weightPerMeterVal = areaM2 * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'square': {
+                const side = parseFloat(document.getElementById('wSquareSide').value);
+                const sideM = side / 1000;
+                const areaM2 = sideM * sideM;
+                areaCm2 = areaM2 * 10000;
+                weightPerMeterVal = areaM2 * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'strip': {
+                const width = parseFloat(document.getElementById('wStripWidth').value);
+                const thick = parseFloat(document.getElementById('wStripThick').value);
+                const areaM2 = (width / 1000) * (thick / 1000);
+                areaCm2 = areaM2 * 10000;
+                weightPerMeterVal = areaM2 * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'round': {
+                const idx = parseInt(document.getElementById('wRoundDia').value);
+                const profile = roundData[idx];
+                areaCm2 = profile.A;
+                weightPerMeterVal = (profile.A / 10000) * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'polygon': {
+                const S = parseFloat(document.getElementById('wPolySize').value);
+                const polyType = document.getElementById('wPolyType').value;
+                const data = getPolygonData(S, polyType);
+                areaCm2 = data.A;
+                weightPerMeterVal = (data.A / 10000) * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'rail': {
+                const idx = parseInt(document.getElementById('wRailProfile').value);
+                const profile = railData[idx];
+                areaCm2 = profile.A;
+                weightPerMeterVal = (profile.A / 10000) * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'piles': {
+                const idx = parseInt(document.getElementById('wPilesProfile').value);
+                const profile = pilesData[idx];
+                areaCm2 = profile.A;
+                weightPerMeterVal = (profile.A / 10000) * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'cprofile': {
+                const idx = parseInt(document.getElementById('wCProfile').value);
+                const profile = cprofileData[idx];
+                areaCm2 = profile.A;
+                weightPerMeterVal = (profile.A / 10000) * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'zet': {
+                const idx = parseInt(document.getElementById('wZetProfile').value);
+                const profile = zetData[idx];
+                areaCm2 = profile.A;
+                weightPerMeterVal = (profile.A / 10000) * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'tavr': {
+                const idx = parseInt(document.getElementById('wTavrProfile').value);
+                const profile = tavrData[idx];
+                areaCm2 = profile.A;
+                weightPerMeterVal = (profile.A / 10000) * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'fut': {
+                const idx = parseInt(document.getElementById('wFutProfile').value);
+                const profile = futData[idx];
+                areaCm2 = profile.A;
+                weightPerMeterVal = (profile.A / 10000) * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'pvl': {
+                const thick = parseFloat(document.getElementById('wPvlThick').value);
+                const width = parseFloat(document.getElementById('wPvlWidth').value);
+                const areaM2 = (width / 1000) * (thick / 1000) * pvlAreaFactor;
+                areaCm2 = areaM2 * 10000;
+                weightPerMeterVal = areaM2 * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'rifle': {
+                const typeRifle = document.getElementById('wRifleType').value;
+                const thickIdx = parseInt(document.getElementById('wRifleThick').value);
+                const width = parseFloat(document.getElementById('wRifleWidth').value);
+                const thicknessItem = rifleData[typeRifle][thickIdx];
+                const areaM2 = (width / 1000) * (1);
+                const weightPerM2 = thicknessItem.m2 * (dens / 7850);
+                weightPerMeterVal = weightPerM2 * (width / 1000);
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+            case 'plate': {
+                const width = parseFloat(document.getElementById('wPlateWidth').value);
+                const thick = parseFloat(document.getElementById('wPlateThick').value);
+                const areaM2 = (width / 1000) * (thick / 1000);
+                areaCm2 = areaM2 * 10000;
+                weightPerMeterVal = areaM2 * dens;
+                lengthM = weight / weightPerMeterVal;
+                break;
+            }
+        }
 
-        addHistory('Сварной шов', { масса_наплавки: metalMass, расход_электродов: electrodeMass });
+        weightLength.innerHTML = `${lengthM.toFixed(3)} <small>м</small>`;
+        weightPerMeter.innerHTML = `${weightPerMeterVal.toFixed(3)} <small>кг/м</small>`;
+
+        addHistory('Расчёт по весу', { тип: type, вес: weight, длина: lengthM });
     });
 
     // ==================== ЗЕМЛЯНЫЕ РАБОТЫ ====================
@@ -2312,8 +2513,8 @@
     closeNotesModal.addEventListener('click', () => notesModal.classList.add('hidden'));
     notesModal.addEventListener('click', (e) => { if (e.target === notesModal) notesModal.classList.add('hidden'); });
 
-    // ==================== ПЕЧАТЬ ====================
-    document.getElementById('printBtn').addEventListener('click', () => window.print());
+    // ==================== ПЕЧАТЬ (удалена) ====================
+    // Кнопка печати и её обработчик удалены.
 
     // Защита от отрицательных чисел
     document.querySelectorAll('input[type="number"]').forEach(input => {
