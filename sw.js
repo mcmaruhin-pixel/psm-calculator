@@ -1,5 +1,5 @@
 // Имя кэша – меняйте при каждом обновлении (v1 → v2 → v3 …)
-const CACHE_NAME = 'psm-calc-v3';
+const CACHE_NAME = 'psm-calc-v2';
 
 // Список файлов, которые будут кэшироваться
 const urlsToCache = [
