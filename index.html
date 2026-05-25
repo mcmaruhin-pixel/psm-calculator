@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
 
     <!-- PWA -->
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/psm-calculator/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#2c3e50">
 </head>
@@ -1080,11 +1080,10 @@
     <script>
         if ('serviceWorker' in navigator) {
             let refreshing = false;
-            navigator.serviceWorker.register('/sw.js')
+            navigator.serviceWorker.register('/psm-calculator/sw.js')
                 .then(reg => {
                     console.log('SW зарегистрирован:', reg);
                     
-                    // Слушаем сообщения от SW
                     navigator.serviceWorker.addEventListener('message', event => {
                         if (event.data === 'update-available' && !refreshing) {
                             refreshing = true;
@@ -1093,7 +1092,6 @@
                         }
                     });
                     
-                    // При обнаружении нового SW (например, при первом обновлении)
                     reg.addEventListener('updatefound', () => {
                         const newWorker = reg.installing;
                         newWorker.addEventListener('statechange', () => {
@@ -1106,7 +1104,6 @@
                 })
                 .catch(err => console.error('Ошибка SW:', err));
                 
-            // Перехватываем управление – принудительный reload при смене SW
             navigator.serviceWorker.addEventListener('controllerchange', () => {
                 if (!refreshing) {
                     refreshing = true;
