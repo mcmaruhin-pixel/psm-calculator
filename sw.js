@@ -22,7 +22,7 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Принудительное обновление (добавьте, если хотите)
+// Принудительное обновление
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
