@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>ПСМ Промстрой Механизация — Расчёт металлоконструкций и земляных работ</title>
     <link rel="stylesheet" href="style.css">
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2c3e50">
 </head>
 <body>
     <div class="calculator">
@@ -1071,71 +1076,45 @@
 
     <script src="script.js"></script>
 
-
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => {
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // Новая версия готова – тихая перезагрузка
-              window.location.reload();
-            }
-          });
-        });
-      });
-  }
-</script>
-
-
-
-
-<script>
-  let deferredPrompt;
-
-  // Слушаем событие beforeinstallprompt
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-
-    // Показываем кнопку установки (можно добавить в интерфейс)
-    const installBtn = document.createElement('button');
-    installBtn.textContent = '📲 Установить приложение';
-    installBtn.style.position = 'fixed';
-    installBtn.style.bottom = '20px';
-    installBtn.style.left = '50%';
-    installBtn.style.transform = 'translateX(-50%)';
-    installBtn.style.zIndex = '9999';
-    installBtn.style.padding = '12px 24px';
-    installBtn.style.backgroundColor = '#2563eb';
-    installBtn.style.color = 'white';
-    installBtn.style.border = 'none';
-    installBtn.style.borderRadius = '8px';
-    installBtn.style.fontWeight = 'bold';
-    installBtn.style.cursor = 'pointer';
-    installBtn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-
-    installBtn.addEventListener('click', () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('Пользователь установил приложение');
-          }
-          deferredPrompt = null;
-          installBtn.remove();
-        });
-      }
-    });
-
-    document.body.appendChild(installBtn);
-  });
-</script>
-
-
-
-
+    <!-- ПРИНУДИТЕЛЬНОЕ АВТООБНОВЛЕНИЕ PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            let refreshing = false;
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => {
+                    console.log('SW зарегистрирован:', reg);
+                    
+                    // Слушаем сообщения от SW
+                    navigator.serviceWorker.addEventListener('message', event => {
+                        if (event.data === 'update-available' && !refreshing) {
+                            refreshing = true;
+                            console.log('Новая версия приложения готова. Перезагружаем...');
+                            window.location.reload();
+                        }
+                    });
+                    
+                    // При обнаружении нового SW (например, при первом обновлении)
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('Новая версия загружена. Принудительное обновление...');
+                                newWorker.postMessage('skip-waiting');
+                            }
+                        });
+                    });
+                })
+                .catch(err => console.error('Ошибка SW:', err));
+                
+            // Перехватываем управление – принудительный reload при смене SW
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    console.log('Service Worker обновлён. Перезагружаем страницу...');
+                    window.location.reload();
+                }
+            });
+        }
+    </script>
 </body>
 </html>

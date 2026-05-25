@@ -1,18 +1,13 @@
-// Имя кэша – меняйте при каждом обновлении (v1 → v2 → v3 …)
-const CACHE_NAME = 'psm-calc-v2';
-
-// Список файлов, которые будут кэшироваться
+const CACHE_NAME = 'psm-calculator-v1';
 const urlsToCache = [
-  'index.html',
-  'style.css',
-  'script.js',
-  'manifest.json',
-  // Если есть иконки, добавьте их:
-  // 'icon-192.png',
-  // 'icon-512.png'
+  '/',
+  '/index.html',
+  '/style.css',
+  '/script.js',
+  '/icon-192.png',
+  '/icon-512.png'
 ];
 
-// Установка Service Worker – кэшируем файлы
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -20,7 +15,6 @@ self.addEventListener('install', event => {
   );
 });
 
-// Активация – удаляем старые кэши
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
@@ -33,9 +27,14 @@ self.addEventListener('activate', event => {
       );
     })
   );
+  // Принудительно активируем нового SW
+  self.clients.claim();
+  // Сообщаем всем открытым вкладкам, что нужно обновиться
+  self.clients.matchAll().then(clients => {
+    clients.forEach(client => client.postMessage('update-available'));
+  });
 });
 
-// Перехват запросов – сначала ищем в кэше, затем в сети
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
